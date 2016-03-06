@@ -1,5 +1,6 @@
 package me.su1414.leftmotd.utils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -28,8 +29,10 @@ public class MOTDUtils {
 		return s;
 	}
 	
-	public static void setMotds(List<String> motds) {
-		MOTDUtils.motds = motds;
+	public static void setMotds(List<String> motd) {
+		motds = null;
+		motds = new ArrayList<>();
+		motds = motd;
 	}
 
 }

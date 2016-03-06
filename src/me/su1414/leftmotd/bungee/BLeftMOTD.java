@@ -18,14 +18,16 @@ import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 import net.md_5.bungee.event.EventHandler;
-import net.md_5.bungee.event.EventPriority;
 
 public class BLeftMOTD extends Plugin implements Listener {
 
 	private static Configuration cfg;
+	private static BLeftMOTD inst;
 
 	@Override
 	public void onEnable() {
+		inst = this;
+		getProxy().getPluginManager().registerCommand(this, new BCommands());
 		boolean m = true;
 		getLogger().log(Level.INFO, "Connecting to Metrics...");
 		try {
@@ -43,6 +45,28 @@ public class BLeftMOTD extends Plugin implements Listener {
 			getDataFolder().mkdir();
 		}
 		ColorUtils.setBungee();
+		reloadCfg();
+	}
+
+	@EventHandler(priority = 100)
+	public void onPing(ProxyPingEvent e) {
+		ServerPing ping = e.getResponse();
+
+		ping.getVersion().setProtocol(3);
+
+		if (cfg.getBoolean("customSlots")) {
+			ping.getVersion().setName((MOTDUtils.getMOTDToSend(true, ping.getVersion().getName(), 0, 0)));
+		} else {
+			ping.getVersion().setName((MOTDUtils.getMOTDToSend(false, "", BungeeCord.getInstance().getOnlineCount(),
+					ping.getPlayers().getMax())));
+		}
+	}
+	
+	public static BLeftMOTD getInst() {
+		return inst;
+	}
+	
+	public void reloadCfg(){
 		File f = new File(getDataFolder(), "config.yml");
 		if (!f.exists()) {
 			try {
@@ -62,20 +86,7 @@ public class BLeftMOTD extends Plugin implements Listener {
 			e.printStackTrace();
 		}
 
+		
 		MOTDUtils.setMotds(ColorUtils.color(cfg.getStringList("leftMOTDs")));
-	}
-
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onPing(ProxyPingEvent e) {
-		ServerPing ping = e.getResponse();
-
-		ping.getVersion().setProtocol(3);
-
-		if (cfg.getBoolean("customSlots")) {
-			ping.getVersion().setName((MOTDUtils.getMOTDToSend(true, ping.getVersion().getName(), 0, 0)));
-		} else {
-			ping.getVersion().setName((MOTDUtils.getMOTDToSend(false, "", BungeeCord.getInstance().getOnlineCount(),
-					ping.getPlayers().getMax())));
-		}
 	}
 }

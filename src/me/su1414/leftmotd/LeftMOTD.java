@@ -15,12 +15,15 @@ import me.su1414.leftmotd.utils.MOTDUtils;
 public class LeftMOTD extends JavaPlugin{
 	
 	private ProtocolManager protocolManager;
+	private static LeftMOTD inst;
 
 	public void onLoad() {
 		protocolManager = ProtocolLibrary.getProtocolManager();
 	}
 	
 	public void onEnable() {
+		inst = this;
+		getCommand("LeftMOTD").setExecutor(new Commands());
 		boolean m = true;
 		getLogger().log(Level.INFO, "Connecting to Metrics...");
 		try {
@@ -34,8 +37,17 @@ public class LeftMOTD extends JavaPlugin{
 		if (m)
 			getLogger().log(Level.INFO, "Connected to Metrics");
 		saveDefaultConfig();
-		MOTDUtils.setMotds(ColorUtils.color(getConfig().getStringList("leftMOTDs")));
+		reloadCfg();
 		protocolManager.addPacketListener(new Listeners(this).getPacketAdapter());
+	}
+	
+	public static LeftMOTD getInst() {
+		return inst;
+	}
+	
+	public void reloadCfg(){
+		reloadConfig();
+		MOTDUtils.setMotds(ColorUtils.color(getConfig().getStringList("leftMOTDs")));
 	}
 	
 }
