@@ -61,17 +61,57 @@ public class BLeftMOTD extends Plugin implements Listener {
 					ping.getPlayers().getMax())));
 		}
 	}
-	
+
 	public static BLeftMOTD getInst() {
 		return inst;
 	}
-	
-	public void reloadCfg(){
+
+	public void reloadCfg() {
+		File f = new File(getDataFolder(), "config.yml");
+		if (!f.exists()) {
+			saveDefaultConfig();
+		} else {
+			try {
+				cfg = ConfigurationProvider.getProvider(YamlConfiguration.class).load(f);
+			} catch (IOException e) {
+				cfg = null;
+			}
+		}
+		
+		if (cfg == null || MOTDUtils.CFG_VER != cfg.getInt("cfg-version"))
+			newCfg();
+
+		MOTDUtils.setMotds(ColorUtils.color(cfg.getStringList("leftMOTDs")));
+	}
+
+	public void newCfg() {
+		getLogger().log(Level.WARNING, "Oops! You have an old config version! I'm generating new...");
+		File cfgFile = new File(getDataFolder(), "config.yml");
+		if (cfgFile.exists()) {
+			File old = new File(getDataFolder(), "oldConfig$" + System.currentTimeMillis() + ".yml");
+			cfgFile.renameTo(old);
+			getLogger().log(Level.INFO, "Saved old config to " + old.getName());
+			if (cfgFile.exists()) {
+				cfgFile.delete();
+			}
+		}
+		saveDefaultConfig();
+		try {
+			cfg = ConfigurationProvider.getProvider(YamlConfiguration.class)
+					.load(new File(getDataFolder(), "config.yml"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		getLogger().log(Level.INFO, "Generated new config to config.yml");
+	}
+
+	public void saveDefaultConfig() {
 		File f = new File(getDataFolder(), "config.yml");
 		if (!f.exists()) {
 			try {
 				f.createNewFile();
 				cfg = ConfigurationProvider.getProvider(YamlConfiguration.class).load(f);
+				cfg.set("cfg-version", MOTDUtils.CFG_VER);
 				cfg.set("customSlots", false);
 				cfg.set("leftMOTDs", Arrays.asList("&eWelcome --->", "&bCustom left MOTDs <3"));
 				ConfigurationProvider.getProvider(YamlConfiguration.class).save(cfg, f);
@@ -85,8 +125,5 @@ public class BLeftMOTD extends Plugin implements Listener {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		
-		MOTDUtils.setMotds(ColorUtils.color(cfg.getStringList("leftMOTDs")));
 	}
 }

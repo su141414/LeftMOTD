@@ -7,21 +7,23 @@ import java.util.Random;
 public class MOTDUtils {
 
 	private static List<String> motds;
+	private static int spaces;
 	private static final Random RAND = new Random();
+	public static final int CFG_VER = 1;
 	
 	public static String getMOTDToSend(boolean customSlots, String versionName, int players, int maxPlayers) {
 		String MOTD = motds.get(RAND.nextInt(motds.size()));
 		String s = "";
 		s += MOTD;
 		if (customSlots) {
-			for (int i = 0; i < 95 - ColorUtils.strip(versionName).length(); i++) {
+			for (int i = 0; i < 70 + spaces - ColorUtils.strip(versionName).length(); i++) {
 				s += " ";
 			}
 
 			s += versionName;
 		} else {
 			String slots = "§7" + players + "§8/§7" + maxPlayers;
-			for (int i = 0; i < 95 - ColorUtils.strip(slots).length(); i++) {
+			for (int i = 0; i < 70 + spaces - ColorUtils.strip(slots).length(); i++) {
 				s += " ";
 			}
 			s += slots;
