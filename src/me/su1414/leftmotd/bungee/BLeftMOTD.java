@@ -2,7 +2,9 @@ package me.su1414.leftmotd.bungee;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 
 import org.mcstats.MetricsBungee;
@@ -65,6 +67,36 @@ public class BLeftMOTD extends Plugin implements Listener {
 	public static BLeftMOTD getInst() {
 		return inst;
 	}
+	
+	public void addMOTD(String motd){
+		List<String> toSave = new ArrayList<>();
+		for(String s : MOTDUtils.getMotds()) {
+			toSave.add(s.replace("§", "&"));
+		}
+		toSave.add(motd);
+		cfg.set("leftMOTDs", toSave);
+		try {
+			saveCfg();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		reloadCfg();
+	}
+	
+	public void removeMOTD(int i){
+		MOTDUtils.getMotds().remove(i);
+		List<String> toSave = new ArrayList<>();
+		for(String s : MOTDUtils.getMotds()) {
+			toSave.add(s.replace("§", "&"));
+		}
+		cfg.set("leftMOTDs", toSave);
+		try {
+			saveCfg();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		reloadCfg();
+	}
 
 	public void reloadCfg() {
 		File f = new File(getDataFolder(), "config.yml");
@@ -82,6 +114,7 @@ public class BLeftMOTD extends Plugin implements Listener {
 			newCfg();
 
 		MOTDUtils.setMotds(ColorUtils.color(cfg.getStringList("leftMOTDs")));
+		MOTDUtils.setSpaces(cfg.getInt("spaces"));
 	}
 
 	public void newCfg() {
@@ -104,6 +137,13 @@ public class BLeftMOTD extends Plugin implements Listener {
 		}
 		getLogger().log(Level.INFO, "Generated new config to config.yml");
 	}
+	
+	public void saveCfg() throws IOException{
+		File f = new File(getDataFolder(), "config.yml");
+		if(!f.exists())
+			f.createNewFile();
+		ConfigurationProvider.getProvider(YamlConfiguration.class).save(cfg, f);
+	}
 
 	public void saveDefaultConfig() {
 		File f = new File(getDataFolder(), "config.yml");
@@ -113,6 +153,7 @@ public class BLeftMOTD extends Plugin implements Listener {
 				cfg = ConfigurationProvider.getProvider(YamlConfiguration.class).load(f);
 				cfg.set("cfg-version", MOTDUtils.CFG_VER);
 				cfg.set("customSlots", false);
+				cfg.set("spaces", 5);
 				cfg.set("leftMOTDs", Arrays.asList("&eWelcome --->", "&bCustom left MOTDs <3"));
 				ConfigurationProvider.getProvider(YamlConfiguration.class).save(cfg, f);
 			} catch (IOException e) {

@@ -2,6 +2,8 @@ package me.su1414.leftmotd;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -54,6 +56,14 @@ public class LeftMOTD extends JavaPlugin {
 			newCfg();
 		reloadConfig();
 		MOTDUtils.setMotds(ColorUtils.color(getConfig().getStringList("leftMOTDs")));
+		MOTDUtils.setSpaces(config.getInt("spaces"));
+	}
+	
+	public void saveCfg() throws IOException{
+		File f = new File(getDataFolder(), "config.yml");
+		if(!f.exists())
+			f.createNewFile();
+		config.save(f);
 	}
 
 	public void newCfg() {
@@ -70,6 +80,36 @@ public class LeftMOTD extends JavaPlugin {
 		saveDefaultConfig();
 		config = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "config.yml"));
 		getLogger().log(Level.INFO, "Generated new config to config.yml");
+	}
+	
+	public void addMOTD(String motd){
+		List<String> toSave = new ArrayList<>();
+		for(String s : MOTDUtils.getMotds()) {
+			toSave.add(s.replace("§", "&"));
+		}
+		toSave.add(motd);
+		config.set("leftMOTDs", toSave);
+		try {
+			saveCfg();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		reloadCfg();
+	}
+	
+	public void removeMOTD(int i){
+		MOTDUtils.getMotds().remove(i);
+		List<String> toSave = new ArrayList<>();
+		for(String s : MOTDUtils.getMotds()) {
+			toSave.add(s.replace("§", "&"));
+		}
+		config.set("leftMOTDs", toSave);
+		try {
+			saveCfg();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		reloadCfg();
 	}
 	
 	
